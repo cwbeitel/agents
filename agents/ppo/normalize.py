@@ -43,9 +43,12 @@ class StreamingNormalize(object):
     self._clip = clip
     self._name = name
     with tf.name_scope(name):
-      self._count = tf.Variable(0, False)
-      self._mean = tf.Variable(tf.zeros_like(template), False)
-      self._var_sum = tf.Variable(tf.zeros_like(template), False)
+      self._count = tf.Variable(0, False,
+                                collections=[tf.GraphKeys.LOCAL_VARIABLES])
+      self._mean = tf.Variable(tf.zeros_like(template), False,
+                               collections=[tf.GraphKeys.LOCAL_VARIABLES])
+      self._var_sum = tf.Variable(tf.zeros_like(template), False,
+                                  collections=[tf.GraphKeys.LOCAL_VARIABLES])
 
   def transform(self, value):
     """Normalize a single or batch tensor.

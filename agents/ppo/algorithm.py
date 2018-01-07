@@ -62,7 +62,8 @@ class PPOAlgorithm(object):
         self._batch_env.reward[0])
     self._memory = memory.EpisodeMemory(
         template, config.update_every, config.max_length, 'memory')
-    self._memory_index = tf.Variable(0, False)
+    self._memory_index = tf.Variable(0, False, name="memory_index",
+                                     collections=[tf.GraphKeys.LOCAL_VARIABLES])
     use_gpu = self._config.use_gpu and utility.available_gpus()
     with tf.device('/gpu:0' if use_gpu else '/cpu:0'):
       # Create network variables for later calls to reuse.
@@ -84,16 +85,22 @@ class PPOAlgorithm(object):
               output.state)
           # pylint: disable=undefined-variable
           self._last_state = tf.contrib.framework.nest.map_structure(
-              lambda x: tf.Variable(lambda: tf.zeros_like(x), False),
+              lambda x: tf.Variable(lambda: tf.zeros_like(x), False,
+              collections=[tf.GraphKeys.LOCAL_VARIABLES]),
               output.state)
         self._last_action = tf.Variable(
-            tf.zeros_like(self._batch_env.action), False, name='last_action')
+            tf.zeros_like(self._batch_env.action), False, name='last_action',
+                          collections=[tf.GraphKeys.LOCAL_VARIABLES])
         self._last_mean = tf.Variable(
-            tf.zeros_like(self._batch_env.action), False, name='last_mean')
+            tf.zeros_like(self._batch_env.action), False, name='last_mean',
+                          collections=[tf.GraphKeys.LOCAL_VARIABLES])
         self._last_logstd = tf.Variable(
-            tf.zeros_like(self._batch_env.action), False, name='last_logstd')
+            tf.zeros_like(self._batch_env.action), False, name='last_logstd',
+                          collections=[tf.GraphKeys.LOCAL_VARIABLES])
     self._penalty = tf.Variable(
-        self._config.kl_init_penalty, False, dtype=tf.float32)
+        self._config.kl_init_penalty, False, dtype=tf.float32,
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
+
     self._optimizer = self._config.optimizer(self._config.learning_rate)
 
   def begin_episode(self, agent_indices):

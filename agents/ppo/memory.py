@@ -41,11 +41,12 @@ class EpisodeMemory(object):
     self._max_length = max_length
     with tf.variable_scope(scope) as var_scope:
       self._scope = var_scope
-      self._length = tf.Variable(tf.zeros(capacity, tf.int32), False)
+      self._length = tf.Variable(tf.zeros(capacity, tf.int32), False,
+                                 collections=[tf.GraphKeys.LOCAL_VARIABLES])
       self._buffers = [
           tf.Variable(tf.zeros(
               [capacity, max_length] + elem.shape.as_list(),
-              elem.dtype), False)
+              elem.dtype), False, collections=[tf.GraphKeys.LOCAL_VARIABLES])
           for elem in template]
 
   def length(self, rows=None):

@@ -35,8 +35,10 @@ class StreamingMean(object):
       dtype: Data type of the mean to compute.
     """
     self._dtype = dtype
-    self._sum = tf.Variable(lambda: tf.zeros(shape, dtype), False)
-    self._count = tf.Variable(lambda: 0, trainable=False)
+    self._sum = tf.Variable(lambda: tf.zeros(shape, dtype), False,
+                            collections=[tf.GraphKeys.LOCAL_VARIABLES])
+    self._count = tf.Variable(lambda: 0, trainable=False,
+                              collections=[tf.GraphKeys.LOCAL_VARIABLES])
 
   @property
   def value(self):
