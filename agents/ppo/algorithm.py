@@ -101,7 +101,11 @@ class PPOAlgorithm(object):
         self._config.kl_init_penalty, False, dtype=tf.float32,
         collections=[tf.GraphKeys.LOCAL_VARIABLES])
 
-    self._optimizer = self._config.optimizer(self._config.learning_rate)
+    if (hasattr(self._config, 'optimizer_pre_initialize') and
+       self._config.optimizer_pre_initialize):
+       self._optimizer = self._config.optimizer
+    else:
+      self._optimizer = self._config.optimizer(self._config.learning_rate)
 
   def begin_episode(self, agent_indices):
     """Reset the recurrent states and stored episode.
@@ -362,7 +366,9 @@ class PPOAlgorithm(object):
     all_gradients = value_gradients + policy_gradients
     all_variables = value_variables + policy_variables
     optimize = self._optimizer.apply_gradients(
-        zip(all_gradients, all_variables))
+        zip(all_gradients, all_variables),
+        global_step=self._step
+        )
     summary = tf.summary.merge([
         value_summary, policy_summary,
         tf.summary.scalar(
